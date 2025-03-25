@@ -1,11 +1,9 @@
 buildscript {
 	repositories {
-		mavenCentral()
-		jcenter()
-		//maven {
-		//	name = "forge"
-		//	url = "https://files.minecraftforge.net/maven"
-		//}
+		maven {
+			name = "forge"
+			url = "https://maven.minecraftforge.net/"
+		}
 		maven {
 			name = "gt"
 			url = "https://gregtech.overminddl1.com/"
@@ -14,11 +12,12 @@ buildscript {
 			name = "sonatype"
 			url = "https://oss.sonatype.org/content/repositories/snapshots/"
 		}
+		mavenCentral()
 	}
 	dependencies {
-		classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
-		//classpath 'net.onedaybeard.artemis:artemis-odb-gradle-plugin:2.2.0'
-		//classpath 'net.onedaybeard.artemis:artemis-fluid-gradle-plugin:2.2.0'
+		classpath ('com.anatawa12.forge:ForgeGradle:1.2-1.1.+') {
+			changing = true
+		}
 	}
 }
 
@@ -27,53 +26,6 @@ allprojects {
 		options.compilerArgs << "-Xlint:deprecation" << "-Xlint:unchecked"
 	}
 }
-
-apply plugin: 'eclipse'
-eclipse {
-	classpath {
-		downloadJavadoc = true
-		downloadSources = true
-	}
-}
-
-def eclipseRuntimeClasspath = ""
-def eclipseRuntimeClasspathTemplate = "<listEntry value=\"&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#10;&lt;runtimeClasspathEntry externalArchive=&quot;@@PATH@@&quot; path=&quot;3&quot; type=&quot;2&quot;/&gt;&#10;\"/>\n"
-
-task eclipseForgeWorkspace(type: Copy) {
-	doFirst {
-		sourceSets.main.runtimeClasspath.collect {
-			eclipseRuntimeClasspath += eclipseRuntimeClasspathTemplate.replaceAll('@@PATH@@', it.toString())
-			""
-		}
-	}
-	from(".meta/eclipse/.metadata") {
-		include '**/*.template'
-		rename { it.replace '.template', '' }
-		filter { it.replaceAll('@@eclipseRuntimeClasspath@@', eclipseRuntimeClasspath) }
-		//rename '(.*).template', '$1'
-	}
-	from(".meta/eclipse/.metadata") {
-		exclude '**/*.launch'
-	}
-	into "eclipse/.metadata"
-}
-
-import org.apache.tools.ant.taskdefs.condition.Os
-task eclipseForgeProject {
-	doLast {
-		if(!(new File("eclipse/Minecraft")).exists()) {
-			if(!Os.isFamily(Os.FAMILY_WINDOWS)) {
-				ant.symlink(resource: "../", link: "eclipse/Minecraft")
-			} else {
-				println("WINDOWS: Before loading this workspace with Eclipse, manually run this in an Elevated/Admin command prompt:")
-				println("mklink /D " + (new File("").absolutePath) + "/eclipse/Minecraft " + (new File("").absolutePath))
-			}
-		}
-	}
-}
-eclipseForgeProject.dependsOn(eclipseForgeWorkspace)
-
-tasks.eclipse.dependsOn(eclipseForgeProject)
 
 apply plugin: 'idea'
 idea{
@@ -155,7 +107,7 @@ version = "<UNKNOWN>"
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
-compileJava.options.bootClasspath = org.gradle.internal.jvm.Jvm.current().getJre().getHomeDir().toString() +"/lib/rt.jar"
+compileJava.options.bootstrapClasspath = files(System.getProperty("java.home") +"/lib/rt.jar")
 compileJava {
 	options.encoding = "UTF-8"
 }
@@ -166,7 +118,7 @@ configurations {
 }
 
 minecraft {
-	version = "1.7.10-10.13.4.1614-1.7.10"
+	version = project.minecraft_version + "-" + project.forge_version
 	runDir = "instance"
 	// This is how you rename a namespace
 	//srgExtra "PK: com/artemis gregtech/thirdparty/com/artemis"
@@ -180,13 +132,13 @@ dependencies {
 	//shade 'net.mostlyoriginal.artemis-odb:contrib-core:2.3.0'
 	//shade 'net.mostlyoriginal.artemis-odb:contrib-eventbus:2.3.0'
 	//shade 'net.fbridault.eeel:artemis-odb-eeel:1.2'
-	runtime 'org.apache.commons:commons-math3:3.2' // Needed for dev opis because it doesn't know how to specify dependencies properly
-	runtime 'org.jfree:jcommon:1.0.21'             // Needed for dev opis because it doesn't know how to specify dependencies properly
-	runtime 'org.jfree:jfreechart:1.0.17'          // Needed for dev opis because it doesn't know how to specify dependencies properly
-	runtime 'com.miglayout:miglayout-swing:4.2'    // Needed for dev opis because it doesn't know how to specify dependencies properly
-	runtime 'net.sf.opencsv:opencsv:2.3'           // Needed for dev opis because it doesn't know how to specify dependencies properly
-	runtime "io.netty-opis:Netty-opis:4.0.23"      // Needed for dev opis because it doesn't know how to specify dependencies properly
-	runtime "mcp.mobius.opis:Opis:1.2.5_1.7.10:dev"
+	runtimeOnly 'org.apache.commons:commons-math3:3.2' // Needed for dev opis because it doesn't know how to specify dependencies properly
+	runtimeOnly 'org.jfree:jcommon:1.0.21'             // Needed for dev opis because it doesn't know how to specify dependencies properly
+	runtimeOnly 'org.jfree:jfreechart:1.0.17'          // Needed for dev opis because it doesn't know how to specify dependencies properly
+	runtimeOnly 'com.miglayout:miglayout-swing:4.2'    // Needed for dev opis because it doesn't know how to specify dependencies properly
+	runtimeOnly 'net.sf.opencsv:opencsv:2.3'           // Needed for dev opis because it doesn't know how to specify dependencies properly
+	runtimeOnly "io.netty-opis:Netty-opis:4.0.23"      // Needed for dev opis because it doesn't know how to specify dependencies properly
+	runtimeOnly "mcp.mobius.opis:Opis:1.2.5_1.7.10:dev"
 	compile "mcp.mobius.waila:Waila:1.5.11-RC2-NONEI_1.7.10:dev"
 	compile "codechicken:CodeChickenLib:1.7.10-1.1.3.140:dev"
 	compile "codechicken:CodeChickenCore:1.7.10-1.0.7.47:dev"
@@ -389,6 +341,7 @@ if (System.getenv().ARTIFACT_VERSION == null) {
 processResources {
 	inputs.property "version", project.buildInfo.tag
 	inputs.property "mcversion", project.minecraft.version
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
 	from(sourceSets.main.resources.srcDirs) {
 		include 'mcmod.info'
@@ -412,9 +365,6 @@ task generateBuildInfo(type: Copy) {
 sourceSets.main.java.srcDir "$buildDir/generated-source/java"
 compileJava.dependsOn generateBuildInfo
 
-task wrapper(type: Wrapper) {
-	gradleVersion = '3.5.1'
-}
 
 //weave {
 //	classesDir = sourceSets.main.output.classesDir
@@ -479,9 +429,15 @@ jar {
 	zip64=true
 }
 
+tasks.named('sourceMainJava') {
+	dependsOn ':generateBuildInfo'
+}
+
 task sourceJar(type: Jar) {
+	dependsOn generateBuildInfo
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 	manifest {}
-	classifier = 'sources'
+	archiveClassifier.set('sources')
 	from sourceSets.main.allSource
 	exclude 'assets/**', 'logos/**'
 }
@@ -499,7 +455,7 @@ task devJar(type: Jar) {
 			exclude 'META-INF', 'META-INF/**'
 		}
 	}
-	classifier = 'dev'
+	archiveClassifier.set('dev')
 	from sourceSets.main.output
 	zip64=true
 }
@@ -545,8 +501,8 @@ task supporterlistgold(type: Copy) {
 task defaultConfigPack(type: Zip) {
 	from('./.defaultconfigs/')
 	include('**/')
-	classifier = 'defaultConfigPack'
-	destinationDir = new File('./build/libs/')
+	archiveClassifier.set('defaultConfigPack')
+	destinationDirectory.set(file("./build/libs/"))
 }
 
 jar.dependsOn supporterlist
@@ -574,19 +530,4 @@ if (!hasProperty("mavenPassword")) {
 
 if (!hasProperty("mavenURL")) {
 	ext.mavenURL="${System.getenv().MAVEN_URL}"
-}
-
-if ( !project.buildInfo.tag.contains("-dirty") && (System.getenv().ONLY_RELEASES!="true" || project.buildInfo.isRelease) ) {
-	task testIfUploadable {}
-
-	uploadArchives {
-		repositories {
-			mavenDeployer {
-				uniqueVersion = false
-				repository(url: mavenURL) {
-					authentication(userName: mavenUsername, password: mavenPassword)
-				}
-			}
-		}
-	}
 }

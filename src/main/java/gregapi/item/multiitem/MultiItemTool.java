@@ -423,7 +423,7 @@ public class MultiItemTool extends MultiItem implements IItemGTHandTool, IItemGT
 						if (aPlayer != null) {
 							UT.Sounds.send(tStats.getBreakingSound(), aPlayer);
 						} else {
-							UT.Sounds.play(tStats.getBreakingSound(), 100, 1, LAST_TOOL_COORDS_BEFORE_DAMAGE);
+//							UT.Sounds.play(tStats.getBreakingSound(), 100, 1, LAST_TOOL_COORDS_BEFORE_DAMAGE);
 						}
 					}
 					LAST_TOOL_COORDS_BEFORE_DAMAGE = null;
@@ -503,7 +503,7 @@ public class MultiItemTool extends MultiItem implements IItemGTHandTool, IItemGT
 		if (!isUsableMeta(aStack)) return null;
 		IToolStats tStats = getToolStats(aStack);
 		if (tStats == null) return null;
-		if (TOOL_SOUNDS) UT.Sounds.play(tStats.getCraftingSound(), 200, 1, LAST_TOOL_COORDS_BEFORE_DAMAGE);
+//		if (TOOL_SOUNDS) UT.Sounds.play(tStats.getCraftingSound(), 200, 1, LAST_TOOL_COORDS_BEFORE_DAMAGE);
 		aStack = ST.amount(1, aStack);
 		doDamage(aStack, tStats.getToolDamagePerContainerCraft(), null, T);
 		return aStack.stackSize > 0 ? aStack : null;
